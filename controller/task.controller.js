@@ -2,7 +2,7 @@ const Task = require("../model/Task");
 
 const taskController = {}
 
-// 기능정의
+//Task 추가
 taskController.createTask = async(req, res)=>{
     try{
         const { task, isComplete } = req.body;
@@ -15,45 +15,44 @@ taskController.createTask = async(req, res)=>{
     
 };
 
-taskController.getTask = async(req, res)=>{
-    try{
-        const taskList = await Task.find({}).select("-__v")
-        res.status(200).json({status:'ok', data:taskList})
-    }catch(err){
-        res.status(400).json({status:'fail', error : err})
+// 모든 Task 조회
+taskController.getAllTasks = async (req, res) => {
+    try {
+        const tasks = await Task.find().select("-__v");
+        res.status(200).json({ status: 'ok', data: tasks });
+    } catch (err) {
+        res.status(400).json({ status: 'fail', error: err.message });
     }
 };
 
-taskController.updateTask = async(req, res)=>{
-    try{
-        const { id } = req.params;
-        const { task, isComplete } = req.body;
-
-        const updateTask = await Task.findByIdAndUpdate(
-            id,
-            {task, isComplete},
-            {new: true, runVaildators: true}
-        )
-        if (!updateTask) {
-            return res.status(404).json({ status: 'fail', message: 'Task not found' });
-        }
-        res.status(200).json({status:'ok', data:updateTask})
-    }catch(err){
-        res.status(400).json({status:'fail', error : err})
+// Task 상태변경
+taskController.updateTask = async (req, res) => {
+    try {
+      const task = await Task.findById(req.params.id);
+      if (!task) {
+        throw new Error("App can not find the task");
+      }
+      const fields = Object.keys(req.body);
+      fields.map((item) => (task[item] = req.body[item]));
+      await task.save();
+      res.status(200).json({ status: "success", data: task });
+    } catch (error) {
+      res.status(400).json({ status: "fail", error });
     }
-};
+  };
 
-taskController.deleteTask = async(req, res)=>{
-    try{
+//Task 삭제
+taskController.deleteTask = async(req, res) => {
+    try {
         const { id } = req.params;
+
         const deleteTask = await Task.findByIdAndDelete(id);
         if (!deleteTask) {
             return res.status(404).json({ status: 'fail', message: 'Task not found' });
         }
-        
-        res.status(200).json({status:'ok', data:deleteTask})
-    }catch(err){
-        res.status(400).json({status:'fail', error : err})
+        res.status(200).json({status:'ok', data:deleteTask});
+    } catch (err) {
+        res.status(400).json({status:'fail', error : err});
     }
 };
 
