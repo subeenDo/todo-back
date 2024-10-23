@@ -95,6 +95,25 @@ userController.deleteUser = async (req, res) => {
     }
 };
 
+userController.getUser = async (req, res) => {
+    try {
+        const { userId } = req;
+        if (!userId) {
+            throw new Error("User ID is missing");
+        }
+
+        const user = await User.findById(userId, "-password -createdAt -updatedAt -__v");
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        res.status(200).json({ status: "success", user });
+    } catch (error) {
+        res.status(400).json({ status: "fail", message: error.message });
+    }
+};
+
+
 
 
 module.exports = userController
