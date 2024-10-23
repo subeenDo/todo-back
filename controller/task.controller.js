@@ -16,10 +16,10 @@ taskController.createTask = async(req, res)=>{
     
 };
 
-// 모든 Task 조회
+// Tasks 조회
 taskController.getAllTasks = async (req, res) => {
     try {
-        const tasks = await Task.find().select("-__v");
+        const tasks = await Task.find().select("-__v").populate("author");
         res.status(200).json({ status: 'ok', data: tasks });
     } catch (err) {
         res.status(400).json({ status: 'fail', error: err.message });
